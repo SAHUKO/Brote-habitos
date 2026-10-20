@@ -12,11 +12,9 @@ inteligencia artificial que analiza tu progreso y te da consejos, usando la
 backend, base de datos de pago ni ninguna suscripción. Todo el código es
 HTML, CSS y JavaScript "vanilla" (sin frameworks ni paso de compilación).
 
-> 🔗 **Demo online:** https://brote-habitos.vercel.app
->
-> 📦 **Repositorio:** https://github.com/SAHUKO/Brote-habitos
->
-> 🎬 **Vídeo de presentación (2–3 min):** _próximamente_
+> **🔗 Demo online:** _pega aquí la URL de Vercel_ (por ejemplo `https://brote-habitos.vercel.app`)
+> **📦 Repositorio:** _pega aquí la URL de GitHub_
+> **🎬 Vídeo de presentación (2–3 min):** _pega aquí el enlace, si lo subes_
 
 ## 🖼️ Así se ve
 
@@ -135,7 +133,8 @@ todos los datos para empezar de cero.
 2. En la app, ve a **Ajustes → Inteligencia artificial**, pega tu clave y
    pulsa "Guardar clave" (puedes probar la conexión antes con "Probar
    conexión").
-3. Ve a **Asistente IA** y pulsa "Analiza mi progreso" o "Sugiéreme un
+3. (Opcional) Elige en qué idioma quieres que responda en **Idioma de las respuestas** (español por defecto).
+4. Ve a **Asistente IA** y pulsa "Analiza mi progreso" o "Sugiéreme un
    hábito nuevo".
 
 El modelo utilizado es **`gemini-3.6-flash`** (el único disponible en el

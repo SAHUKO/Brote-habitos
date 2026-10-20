@@ -408,3 +408,25 @@ select, input{ font-family: inherit; }
 .emoji-option:hover { border-color:var(--moss); background:var(--moss-pale); }
 .emoji-option.selected { border:2px solid var(--moss); background:var(--moss-pale); }
 @media(max-width:760px) { .emoji-picker-panel { width:min(355px,calc(100vw - 38px)); } .emoji-picker-trigger { justify-content:center; } }
+
+/* Selector del mapa de constancia (Estadísticas): a juego con botones y buscador */
+#heatmapHabitSelect{
+  appearance: none; -webkit-appearance: none;
+  padding: 9px 38px 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238A8F84' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  color: var(--text);
+  font-size: .85rem; font-weight: 500;
+  max-width: 100%; min-width: 200px;
+  cursor: pointer;
+  transition: border-color .15s, background-color .15s;
+}
+#heatmapHabitSelect:hover{ background-color: var(--paper-soft); }
+#heatmapHabitSelect:focus-visible{ outline: 2px solid var(--moss); outline-offset: 2px; }
+@media (max-width: 760px){
+  #heatmapHabitSelect{ width: 100%; }
+}

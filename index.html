@@ -320,7 +320,9 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Si el CDN falla, carga la copia local (descárgala a js/vendor/chart.umd.min.js) -->
+<script>window.Chart || document.write('<script src="js/vendor/chart.umd.min.js"><\/script>')</script>
 <script src="js/data.js"></script>
 <script src="js/storage.js"></script>
 <script src="js/demo.js"></script>

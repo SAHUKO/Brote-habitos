@@ -243,9 +243,53 @@ function renderCatalogAccordion(filter = "") {
 let completionChart = null;
 let categoryChart = null;
 
+// Lee los colores del tema actual (claro/oscuro) desde las variables CSS,
+// para que ejes, rejilla y textos de los gráficos se lean bien en ambos modos.
+function chartTheme() {
+  const css = getComputedStyle(document.body);
+  const v = name => css.getPropertyValue(name).trim();
+  return {
+    text:  v("--text-soft") || "#5B6156",
+    grid:  v("--border")    || "#E1D9C4",
+    moss:  v("--moss")      || "#4E7A43",
+    amber: v("--amber")     || "#DE9F3B",
+  };
+}
+
+function applyChartDefaults() {
+  const t = chartTheme();
+  Chart.defaults.font.family = "'Work Sans', sans-serif";
+  Chart.defaults.color = t.text;
+  Chart.defaults.borderColor = t.grid;
+}
+
+// Al cambiar de tema, si la vista de Estadísticas está abierta, se redibujan los gráficos.
+const themeObserver = new MutationObserver(() => {
+  const statsView = document.getElementById("view-stats");
+  if (statsView && statsView.classList.contains("active") && typeof Chart !== "undefined") {
+    applyChartDefaults();
+    renderCompletionChart();
+    renderCategoryChart();
+  }
+});
+[document.documentElement, document.body].forEach(el =>
+  themeObserver.observe(el, { attributes: true, attributeFilter: ["data-theme", "class"] })
+);
+
 function renderStatsView() {
-  renderCompletionChart();
-  renderCategoryChart();
+  // Los gráficos dependen de Chart.js; si la librería no ha cargado (CDN caído,
+  // sin conexión, bloqueador…) los saltamos para que el resto de la vista se pinte igual.
+  if (typeof Chart !== "undefined") {
+    applyChartDefaults();
+    try {
+      renderCompletionChart();
+      renderCategoryChart();
+    } catch (err) {
+      console.error("Error al dibujar los gráficos:", err);
+    }
+  } else {
+    console.warn("Chart.js no está disponible: se omiten los gráficos de Estadísticas.");
+  }
   renderHeatmapSelect();
   renderFullHeatmap();
 }
@@ -264,8 +308,8 @@ function renderCompletionChart() {
       datasets: [{
         label: "% cumplido",
         data: values,
-        borderColor: "#4E7A43",
-        backgroundColor: "rgba(78,122,67,0.15)",
+        borderColor: chartTheme().moss,
+        backgroundColor: chartTheme().moss + "26", // ~15 % de opacidad
         fill: true,
         tension: 0.35,
         pointRadius: 0,
@@ -296,14 +340,20 @@ function renderCategoryChart() {
       datasets: [{
         label: "Completados",
         data: values,
-        backgroundColor: "#DE9F3B",
+        backgroundColor: chartTheme().amber,
         borderRadius: 6,
+        maxBarThickness: 26,
       }],
     },
     options: {
+      indexAxis: "y", // barras horizontales: las categorías se leen rectas, también en móvil
       responsive: true,
+      aspectRatio: window.innerWidth < 600 ? 1.1 : 2.2,
       plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      scales: {
+        x: { beginAtZero: true, ticks: { precision: 0 } },
+        y: { grid: { display: false } },
+      },
     },
   });
 }
