@@ -12,9 +12,11 @@ inteligencia artificial que analiza tu progreso y te da consejos, usando la
 backend, base de datos de pago ni ninguna suscripción. Todo el código es
 HTML, CSS y JavaScript "vanilla" (sin frameworks ni paso de compilación).
 
-> **🔗 Demo online:** _pega aquí la URL de Vercel_ (por ejemplo `https://brote-habitos.vercel.app`)
-> **📦 Repositorio:** _pega aquí la URL de GitHub_
-> **🎬 Vídeo de presentación (2–3 min):** _pega aquí el enlace, si lo subes_
+> 🔗 **Demo online:** https://brote-habitos.vercel.app
+>
+> 📦 **Repositorio:** https://github.com/SAHUKO/Brote-habitos
+>
+> 🎬 **Vídeo de presentación (2–3 min):** _próximamente_
 
 ## 🖼️ Así se ve
 
