@@ -1,0 +1,567 @@
+================================================================
+ BROTE — GESTOR DE BUENOS HÁBITOS
+ Documento de desarrollo y presentación del proyecto final
+ Máster de Programación + IA — Jobie TECH
+================================================================
+
+Este documento explica, de principio a fin y con el máximo detalle
+posible, cómo se ha planteado, diseñado, construido y probado la
+aplicación "Brote". Sirve a la vez como el "documento de presentación"
+que pide el enunciado del proyecto final (qué problema resuelve, qué
+funcionalidades incluye, cómo se ha usado la IA y qué se mejoraría con
+más tiempo) y como un cuaderno de bitácora razonado de todas las
+decisiones técnicas y de diseño que se han tomado.
+
+
+ÍNDICE
+------
+1. Qué problema resuelve la aplicación
+2. Qué tipo de proyecto es (según las opciones del enunciado)
+3. Decisiones de enfoque y restricciones de partida
+4. Elección de tecnologías y por qué
+5. Arquitectura de la aplicación y estructura de archivos
+6. Modelo de datos (qué se guarda y cómo)
+7. Explicación funcionalidad por funcionalidad
+8. Diseño visual: concepto, paleta y tipografía
+9. La integración de inteligencia artificial, paso a paso
+10. Cómo se ha probado la aplicación
+11. Cómo desplegarla gratis (GitHub + Vercel)
+12. Cumplimiento de los requisitos mínimos del proyecto (checklist)
+13. Limitaciones actuales y qué mejoraría con más tiempo
+14. Uso de la IA durante el desarrollo (transparencia del proceso)
+
+
+1. QUÉ PROBLEMA RESUELVE LA APLICACIÓN
+---------------------------------------
+Mantener buenos hábitos (beber agua, dormir bien, leer, ahorrar,
+meditar, hacer ejercicio...) es sencillo en teoría pero difícil en la
+práctica porque no solemos ver de forma clara nuestro propio progreso:
+no sabemos si llevamos "racha" o no, no tenemos ningún recordatorio
+visual de lo que hemos conseguido, y cuando fallamos un día no sabemos
+si merece la pena seguir intentándolo.
+
+Brote resuelve esto ofreciendo:
+- Un sitio único y sencillo donde apuntar los hábitos que se quieren
+  seguir (sin tener que inventarlos desde cero: hay un catálogo amplio
+  ya pensado y organizado).
+- Una forma muy visual de ver el progreso día a día (rachas, anillos de
+  progreso, mapas de calor tipo "contribuciones de GitHub").
+- Un empujón de motivación cuando hace falta, a través de un asistente
+  de IA que analiza los datos reales del usuario (no consejos
+  genéricos) y le da feedback y sugerencias concretas.
+
+En resumen: no es una app de lista de tareas (to-do), sino una
+herramienta de seguimiento de comportamientos repetidos en el tiempo,
+con el refuerzo positivo (rachas, colores, IA) como motor de
+motivación.
+
+
+2. QUÉ TIPO DE PROYECTO ES
+----------------------------
+Según las categorías que propone el enunciado del proyecto final,
+Brote encaja principalmente en la opción 1 ("un gestor o tracker
+personal" — en este caso, un tracker de hábitos diarios) pero también
+incorpora elementos de la opción 3 ("una herramienta con IA
+integrada"), ya que el asistente de IA no es un añadido decorativo:
+analiza datos reales del usuario y genera texto personalizado, no
+respuestas fijas.
+
+
+3. DECISIONES DE ENFOQUE Y RESTRICCIONES DE PARTIDA
+------------------------------------------------------
+Antes de escribir una sola línea de código se fijaron tres
+restricciones no negociables, pedidas expresamente:
+
+a) Que el desarrollo Y el uso de la aplicación fueran 100% gratuitos.
+   Esto descarta cualquier backend de pago, base de datos en la nube
+   de pago, o API de IA sin capa gratuita.
+
+b) Que se pudiera subir a un repositorio de GitHub y publicar en
+   Vercel (o similar) sin fricción.
+
+c) Que quedara documentado el razonamiento completo del desarrollo en
+   un archivo de texto aparte (este mismo documento).
+
+Estas tres restricciones son las que más han condicionado las
+decisiones técnicas del punto siguiente.
+
+
+4. ELECCIÓN DE TECNOLOGÍAS Y POR QUÉ
+----------------------------------------
+FRONTEND: HTML + CSS + JavaScript "vanilla" (sin frameworks)
+  Se ha descartado usar React, Vue o cualquier framework porque:
+  - El enunciado solo pide HTML, CSS y JavaScript, y añadir un
+    framework habría exigido un paso de compilación (build), lo que
+    complica innecesariamente el despliegue gratuito y no aporta nada
+    a un proyecto de este tamaño.
+  - Sin paso de compilación, cualquier persona puede clonar el
+    repositorio y abrir "index.html" directamente: cero fricción.
+
+DATOS: localStorage del navegador
+  El enunciado permite elegir entre localStorage, Supabase, una API
+  externa o una API propia. Se ha elegido localStorage porque:
+  - Es gratis al 100% y no depende de ningún servicio externo que
+    pueda dar de baja la cuenta gratuita, cambiar condiciones, o
+    quedarse sin cuota.
+  - No requiere backend, lo que simplifica muchísimo el despliegue
+    (sigue siendo un sitio 100% estático).
+  - Encaja con el uso real de la app: es una herramienta personal, de
+    un solo usuario en un solo navegador, no una app multiusuario que
+    necesite sincronizar datos entre dispositivos.
+  El principal contrapunto (que se explica también en el apartado de
+  "limitaciones") es que los datos no se sincronizan entre
+  dispositivos ni sobreviven a borrar los datos del navegador; por eso
+  se ha añadido una función de exportar/importar copia de seguridad en
+  JSON, para mitigarlo.
+
+INTELIGENCIA ARTIFICIAL: API gratuita de Google Gemini
+  Para cumplir el requisito de que la app "incluya al menos una
+  llamada a una API de inteligencia artificial", se necesitaba un
+  proveedor de IA con capa gratuita real (no solo una prueba de unos
+  días). Se eligió Gemini porque:
+  - Google AI Studio ofrece una clave de API gratuita con límites de
+    uso generosos para un proyecto personal (peticiones por minuto y
+    por día más que suficientes para este caso de uso).
+  - Al ser una API REST estándar (un simple fetch con JSON), se puede
+    llamar directamente desde el navegador con "fetch", sin necesitar
+    ningún backend propio: la clave se guarda en localStorage y las
+    peticiones van directas del navegador del usuario a los servidores
+    de Google.
+  - Esto también resuelve, de paso, el reto de "cómo despliego un
+    backend gratis": al no necesitar backend, no hace falta.
+  El pequeño coste de este enfoque es que cada persona que use la app
+  tiene que poner su propia clave gratuita (no se puede compartir una
+  clave propia sin backend, porque quedaría expuesta en el código
+  público de GitHub). Se explica cómo conseguirla, gratis, directamente
+  en la pantalla de Ajustes de la app.
+
+PUBLICACIÓN: Vercel (o GitHub Pages / Netlify)
+  Al ser un sitio 100% estático (sin backend, sin build), se puede
+  publicar gratis en cualquiera de las tres plataformas sin configurar
+  nada especial. Se eligió documentar Vercel porque es la que se pidió
+  expresamente, pero el mismo código funciona igual en GitHub Pages.
+
+GRÁFICAS: Chart.js (a través de CDN gratuito)
+  Para las gráficas de la sección de Estadísticas se usa Chart.js
+  cargado desde cdnjs.cloudflare.com. Es una librería gratuita y muy
+  ligera, no requiere instalación ni build, y permite hacer gráficas de
+  líneas y barras con pocas líneas de código.
+
+
+5. ARQUITECTURA DE LA APLICACIÓN Y ESTRUCTURA DE ARCHIVOS
+-------------------------------------------------------------
+La aplicación es una SPA (Single Page Application) muy sencilla: un
+único "index.html" contiene las seis pantallas (vistas) de la app, y
+JavaScript se encarga de mostrar solo una a la vez, sin recargar la
+página.
+
+  brote-habitos/
+  ├── index.html                    Estructura de las 6 vistas
+  ├── css/
+  │   └── style.css                  Todo el sistema de diseño
+  ├── js/
+  │   ├── data.js                    Catálogo de hábitos (datos estáticos)
+  │   ├── storage.js                 Acceso a localStorage y cálculos
+  │   ├── ai.js                      Llamadas a la API de Gemini
+  │   ├── ui.js                      Renderizado del DOM (pintar pantallas)
+  │   └── main.js                    Eventos, routing e inicialización
+  ├── README.md
+  └── DOCUMENTACION_DESARROLLO.txt   Este documento
+
+Se ha dividido el JavaScript en 5 archivos con una responsabilidad
+clara cada uno (en vez de un único archivo gigante) para que el código
+sea fácil de leer, mantener y ampliar:
+
+  - data.js     -> QUÉ datos de partida existen (no cambia en tiempo
+                   de ejecución).
+  - storage.js  -> DÓNDE y CÓMO se guardan y calculan los datos del
+                   usuario (localStorage, rachas, estadísticas).
+  - ai.js       -> CÓMO se habla con la API externa de IA.
+  - ui.js       -> CÓMO se pinta cada pantalla a partir de los datos
+                   (funciones "puras": leen datos y generan HTML).
+  - main.js     -> QUÉ pasa cuando el usuario interactúa (clics,
+                   formularios, navegación entre vistas) y el arranque
+                   de la app.
+
+Esta separación seguiría un patrón similar a MVC (Modelo - Vista -
+Controlador): storage.js es el modelo, ui.js es la vista, y main.js es
+el controlador que conecta eventos con lógica y repintado.
+
+
+6. MODELO DE DATOS
+----------------------
+Todo vive en tres claves de localStorage, en formato JSON:
+
+  gh_habits -> array de hábitos del usuario. Cada hábito:
+    {
+      id: "h_xxxxx",          identificador único generado en el navegador
+      name: "Meditar 10 minutos",
+      icon: "🧘",
+      category: "mente",      referencia a una de las 8 categorías
+      sourceId: "c-meditar",  id del catálogo si viene de ahí, o null
+      createdAt: "2026-09-01",fecha de alta (para no contar días previos)
+      archived: false
+    }
+
+  gh_completions -> diccionario { idHabito: ["2026-09-18", "2026-09-19", ...] }
+    Un array de fechas (formato ISO "YYYY-MM-DD") por cada hábito, con
+    los días en los que se marcó como completado. Se ha elegido esta
+    estructura (en vez de, por ejemplo, un booleano por día) porque
+    permite calcular fácilmente rachas, totales por mes, por categoría,
+    y pintar mapas de calor, sin tener que guardar "huecos" para los
+    días no completados.
+
+  gh_settings -> { theme, geminiApiKey, geminiModel, dailyTip }
+    Preferencias del usuario y configuración de la IA. El "dailyTip" se
+    cachea con la fecha del día para no gastar peticiones a la API cada
+    vez que se abre el dashboard: solo se regenera si el usuario pulsa
+    "Regenerar" o ha cambiado el día.
+
+Cálculo de rachas (la parte más "algorítmica" del proyecto):
+  - Racha actual: se parte de hoy (o de ayer, si hoy aún no se ha
+    marcado, para no penalizar al usuario que todavía no ha tenido
+    ocasión de marcarlo) y se cuenta hacia atrás mientras haya días
+    consecutivos completados.
+  - Mejor racha histórica: se ordenan todas las fechas completadas y se
+    busca la subsecuencia más larga de días consecutivos.
+
+
+7. EXPLICACIÓN FUNCIONALIDAD POR FUNCIONALIDAD
+---------------------------------------------------
+
+7.1 RESUMEN (Dashboard)
+  Es la pantalla de entrada. Muestra:
+  - Un anillo de progreso (SVG) con el % de hábitos completados hoy.
+  - Tres tarjetas con: mejor racha global, número de hábitos activos y
+    total de veces completado en el mes en curso.
+  - La lista de "hábitos de hoy" con un botón redondo para marcar cada
+    uno como hecho/no hecho con un solo clic.
+  - Un mini mapa de calor de las últimas 12 semanas (agregado de todos
+    los hábitos).
+  - Un panel de "Consejo del día" generado por IA (o un mensaje
+    orientativo si aún no se ha configurado la clave).
+  Decisión de diseño: se prioriza que, nada más entrar, el usuario vea
+  de un vistazo "cómo voy hoy" y pueda actuar (marcar un hábito) sin
+  cambiar de pantalla.
+
+7.2 MIS HÁBITOS
+  Lista todos los hábitos del usuario agrupados por categoría. Cada
+  tarjeta muestra: icono, nombre, racha actual, una fila con los
+  últimos 7 días (se puede marcar o desmarcar cualquiera de esos días,
+  no solo "hoy", pensado para cuando el usuario se acuerda de apuntar
+  algo con retraso) y un botón para eliminar el hábito (con
+  confirmación, porque borra también su historial).
+
+7.3 AÑADIR HÁBITO
+  Tiene dos formas de añadir hábitos:
+  a) Un formulario para crear un hábito 100% personalizado (nombre,
+     emoji, categoría).
+  b) Un catálogo desplegable (acordeón) organizado por las 8
+     categorías, con más de 30 hábitos ya redactados y con icono, cada
+     uno con un botón "+" para añadirlo con un solo clic. Los hábitos
+     ya añadidos se marcan como tal y no se pueden duplicar. Incluye un
+     buscador para filtrar por nombre.
+  Este catálogo es el que responde al requisito de "una lista
+  precargada de buenos hábitos, amplia y ordenada" pedido para el
+  proyecto: están agrupados por categoría y cubren ámbitos muy
+  distintos de la vida (salud, alimentación, mente, productividad,
+  aprendizaje, finanzas, relaciones y creatividad) para que sirva a
+  perfiles de usuario muy distintos.
+
+7.4 ESTADÍSTICAS
+  - Gráfica de líneas con el % de cumplimiento diario de los últimos
+    30 días (Chart.js).
+  - Gráfica de barras con el total de veces completado por categoría,
+    para ver en qué áreas de la vida se está siendo más constante.
+  - Mapa de calor de hasta 6 meses, que se puede ver agregado (todos
+    los hábitos) o filtrado a un único hábito, con su racha actual y
+    mejor racha.
+  - Botón para exportar todo el historial a un archivo CSV (hábito,
+    categoría, fecha), pensado para quien quiera analizar sus datos en
+    Excel/Sheets o guardarlos fuera de la app.
+
+7.5 ASISTENTE DE IA
+  Si no hay clave de API configurada, se muestra un aviso con acceso
+  directo a Ajustes. Si ya hay clave, se ofrecen dos acciones:
+  - "Analiza mi progreso": envía a Gemini un resumen (no los datos en
+    bruto) de los hábitos actuales, su racha y el % de cumplimiento
+    medio de los últimos 14 días, y le pide un análisis breve, cercano
+    y con una única recomendación concreta.
+  - "Sugiéreme un hábito nuevo": le pide que, a partir de los hábitos
+    actuales, proponga uno nuevo que complemente bien la rutina del
+    usuario, con una breve explicación de por qué encaja.
+  Ambas muestran un estado de carga mientras se espera la respuesta y,
+  si algo falla (clave inválida, límite de peticiones alcanzado, sin
+  conexión), un mensaje de error entendible en español, no un error
+  técnico en crudo.
+
+7.6 AJUSTES
+  - Gestión de la clave de la API de Gemini (guardar, probar conexión,
+    eliminar) y elección de modelo (gemini-2.5-flash por defecto, con
+    alternativas más rápidas o más estables).
+  - Exportar/importar una copia de seguridad completa en JSON (por si
+    se cambia de navegador o de ordenador).
+  - Botón de borrado total de datos, con doble confirmación porque es
+    una acción irreversible.
+  - Selector de tema claro/oscuro.
+
+
+8. DISEÑO VISUAL: CONCEPTO, PALETA Y TIPOGRAFÍA
+----------------------------------------------------
+Concepto: "un jardín de hábitos". Cada hábito es como una planta que
+crece con la constancia; de ahí el nombre "Brote", el icono 🌱, y que
+el color principal de la app sea un verde musgo (crecimiento) con un
+acento en ámbar cálido para las rachas, evocando el "fuego" de la
+constancia sin recurrir al típico rojo de alerta.
+
+Paleta principal:
+  --ink   #16241C   verde muy oscuro, casi negro, para la barra lateral
+  --paper #F5F1E6   fondo cálido tipo papel, no un blanco puro
+  --moss  #4E7A43   verde musgo, color de acción principal
+  --amber #DE9F3B   ámbar cálido, para rachas y acentos de logro
+  --clay  #8A5A44   tono tierra, de apoyo
+
+Tipografía: se combinan dos familias con personalidades distintas y
+complementarias:
+  - "Fraunces" (serif con detalles orgánicos y variables) para
+    titulares: aporta el carácter "editorial" y cálido de la marca.
+  - "Work Sans" (de palo, muy legible) para el resto del texto e
+    interfaz, para que el contenido funcional sea claro y neutro.
+
+Estructura visual: se ha evitado el patrón genérico de "tarjetas
+idénticas con sombra suave" en la medida de lo posible: la tarjeta
+"hero" del dashboard tiene un tratamiento propio (degradado verde,
+anillo de progreso), y los mapas de calor reutilizan visualmente la
+metáfora de "más verde = más constancia", igual que una planta que
+gana más hojas.
+
+Responsive: en pantallas de más de 760px se usa una barra lateral fija
+con todo el menú; por debajo de ese ancho la barra lateral desaparece y
+se sustituye por una barra de navegación inferior fija (patrón de app
+móvil), para que sea igual de cómoda de usar con el pulgar en el móvil
+que con ratón en escritorio.
+
+
+9. LA INTEGRACIÓN DE INTELIGENCIA ARTIFICIAL, PASO A PASO
+----------------------------------------------------------------
+Esta es la parte del proyecto que corresponde al requisito de "IA" del
+enunciado, así que se detalla con más profundidad:
+
+Paso 1 — Obtención de la clave (la hace el propio usuario, gratis):
+  El usuario entra en https://aistudio.google.com/apikey con su cuenta
+  de Google y genera una clave de API. Google ofrece un nivel gratuito
+  con límites de peticiones por minuto/día más que suficientes para
+  el uso personal de esta app.
+
+Paso 2 — Guardado local y seguro de la clave:
+  La clave se guarda únicamente en localStorage (función
+  updateSettings de storage.js). Nunca se envía a ningún servidor
+  propio porque esta app no tiene servidor: solo existe el navegador
+  del usuario y los servidores de Google.
+
+Paso 3 — Construcción del prompt con datos reales del usuario:
+  La función buildHabitsSummaryForPrompt() (en ai.js) recoge los
+  hábitos actuales, su racha actual, su mejor racha y el % medio de
+  cumplimiento de los últimos 14 días, y arma un resumen en texto. Este
+  resumen se inserta en el prompt que se envía a Gemini, de forma que
+  la respuesta de la IA esté basada en datos reales y no sea un texto
+  genérico que serviría para cualquier persona.
+
+Paso 4 — Llamada a la API (fetch directo desde el navegador):
+  La función callGemini() hace un POST a
+  "https://generativelanguage.googleapis.com/v1beta/models/{modelo}
+  :generateContent?key={clave}" con el prompt dentro de un objeto
+  "contents", tal y como especifica la documentación oficial de la API
+  de Gemini. Se limita la respuesta (maxOutputTokens) para que sea
+  breve y rápida, y se ajusta la "temperature" a 0.8 para que el tono
+  sea natural y no demasiado repetitivo.
+
+Paso 5 — Manejo de errores en español:
+  Se contemplan de forma explícita los casos de clave inválida (400),
+  falta de permisos (403), límite de peticiones superado (429) y fallo
+  de red, mostrando en cada caso un mensaje claro y accionable en la
+  interfaz, en vez de dejar que se rompa la pantalla o se muestre un
+  error críptico.
+
+Paso 6 — Tres usos concretos de la IA en la app:
+  a) "Analiza mi progreso": feedback personalizado + una recomendación.
+  b) "Sugiéreme un hábito nuevo": sugerencia razonada de un hábito que
+     complementa los ya existentes.
+  c) "Consejo del día" del dashboard: una frase motivadora corta,
+     cacheada por día para no repetir llamadas innecesarias.
+
+Esto cumple con creces el requisito mínimo ("al menos una llamada a
+una API de IA"): hay tres puntos de uso distintos, todos ellos
+basados en los datos reales del usuario, no en respuestas
+precocinadas.
+
+
+10. CÓMO SE HA PROBADO LA APLICACIÓN
+------------------------------------------
+Además de probar la app manualmente en el navegador (crear hábitos,
+marcar días, comprobar rachas, cambiar de tema, exportar datos,
+navegar en móvil y escritorio), se ha construido una batería de
+pruebas automatizadas con Node.js y la librería "jsdom" (que simula un
+navegador dentro de Node) para validar, sin depender de comprobación
+visual manual, que:
+
+  - La app arranca en la vista de resumen.
+  - Se puede crear un hábito personalizado desde el formulario.
+  - Se puede añadir un hábito desde el catálogo y que no se pueda
+    duplicar.
+  - Marcar un hábito como completado hoy funciona y actualiza
+    correctamente localStorage.
+  - El cálculo de racha actual es correcto: una racha de 5 días
+    consecutivos se detecta como "5", y si se rompe un día se vuelve a
+    contar desde el último día marcado.
+  - Se puede eliminar un hábito y su historial desaparece.
+  - Guardar la clave de la API deja la app lista para mostrar las
+    acciones de IA (sin necesidad de gastar una llamada real a Gemini
+    en el test).
+  - Exportar e importar datos, y el borrado total, funcionan.
+  - El cambio de tema claro/oscuro se aplica.
+  - Se puede navegar a las seis vistas sin que salte ningún error.
+
+Estas pruebas se ejecutaron contra un servidor local (no directamente
+sobre el archivo, porque localStorage tiene restricciones bajo el
+protocolo "file://") y sirvieron para detectar y corregir, antes de la
+entrega, un error real en el cálculo de alineación del mapa de calor
+por día de la semana.
+
+Nota: por sencillez y para no depender de herramientas externas al
+entregar el proyecto, el archivo de pruebas no se incluye en el
+repositorio final, pero el proceso descrito aquí es exactamente el que
+se siguió durante el desarrollo.
+
+
+11. CÓMO DESPLEGARLA GRATIS (GITHUB + VERCEL)
+----------------------------------------------------
+1. Crear un repositorio público nuevo en GitHub y subir el contenido de
+   esta carpeta ("git init", "git add .", "git commit", "git push").
+2. Entrar en vercel.com, iniciar sesión con la cuenta de GitHub.
+3. "Add New" -> "Project" -> seleccionar el repositorio.
+4. Como es un sitio estático sin build, dejar "Framework Preset" en
+   "Other" y no configurar ningún comando de build.
+5. Pulsar "Deploy". Vercel entrega una URL pública gratuita en
+   segundos (algo como "brote-habitos.vercel.app").
+6. (Opcional) Cada vez que se haga "git push" a la rama principal,
+   Vercel vuelve a desplegar automáticamente.
+
+El mismo código, sin ningún cambio, se puede publicar igual en GitHub
+Pages (Settings -> Pages -> Deploy from branch) o en Netlify.
+
+
+12. CUMPLIMIENTO DE LOS REQUISITOS MÍNIMOS DEL PROYECTO
+-------------------------------------------------------------
+  Frontend HTML/CSS/JS responsive
+    -> Sí. Sin frameworks, con diseño adaptado a móvil (barra inferior)
+       y escritorio (barra lateral).
+
+  Al menos dos funcionalidades distintas y operativas
+    -> Sí, y de sobra: seguimiento de hábitos con rachas, catálogo y
+       creación de hábitos, estadísticas y gráficas, mapa de calor,
+       asistente de IA, exportación a CSV, copia de seguridad JSON.
+
+  Guardar/consultar datos (localStorage, Supabase, API externa o propia)
+    -> Sí, con localStorage, incluyendo import/export como añadido.
+
+  Al menos una llamada a una API de IA o función real de IA
+    -> Sí, tres puntos de uso reales de la API de Google Gemini
+       (análisis de progreso, sugerencia de hábito, consejo del día),
+       todos con datos reales del usuario.
+
+  Publicación en GitHub Pages / Netlify / Vercel o similar
+    -> Preparada para Vercel (instrucciones incluidas), sin cambios
+       necesarios para GitHub Pages o Netlify.
+
+  Repositorio público de GitHub con README claro
+    -> Sí, incluido en el proyecto (README.md).
+
+
+13. LIMITACIONES ACTUALES Y QUÉ MEJORARÍA CON MÁS TIEMPO
+----------------------------------------------------------------
+- Los datos viven solo en el navegador donde se usa la app: no hay
+  sincronización entre dispositivos. Con más tiempo, añadiría un modo
+  opcional de sincronización usando Supabase (que también tiene capa
+  gratuita), manteniendo localStorage como modo por defecto para no
+  perder la sencillez ni el "cero configuración" actual.
+- Los hábitos son todos de frecuencia diaria. Añadiría frecuencias
+  configurables (por ejemplo, "3 veces por semana" o "solo entre
+  semana"), lo que cambiaría el cálculo de racha para que sea más justo
+  con esos casos.
+- El asistente de IA no guarda conversación ni permite hacer preguntas
+  libres: son dos acciones predefinidas más el consejo del día. Con más
+  tiempo añadiría un cuadro de chat libre para poder preguntar
+  cualquier cosa sobre los propios hábitos.
+- No hay recordatorios ni notificaciones (push o por email), porque
+  requerirían permisos del navegador o un servicio en segundo plano.
+  Sería una buena siguiente iteración usando la Notifications API del
+  navegador.
+- El emoji como icono de hábito es una solución deliberadamente
+  sencilla y gratuita (cero peso, cero dependencias de imágenes); con
+  más tiempo se podría ofrecer una pequeña librería de iconos SVG
+  temáticos como alternativa.
+- Actualmente cada usuario debe generar su propia clave de Gemini. Se
+  podría mitigar con un pequeño backend serverless gratuito (por
+  ejemplo, una función de Vercel) que ocultara una clave compartida,
+  pero se ha optado conscientemente por no hacerlo para mantener el
+  proyecto 100% estático y con cero configuración de servidor.
+
+
+14. USO DE LA IA DURANTE EL DESARROLLO (TRANSPARENCIA)
+-------------------------------------------------------------
+Siguiendo el espíritu del máster ("la IA es tu copiloto, no el
+piloto"), en el desarrollo de este proyecto se ha usado asistencia de
+IA para: generar la estructura inicial de código a partir de los
+requisitos, redactar el catálogo de hábitos, revisar el diseño visual
+para que no fuera genérico, y escribir pruebas automatizadas que
+ayudaran a detectar errores (de hecho, gracias a esas pruebas se
+detectó y corrigió un fallo real en el cálculo del mapa de calor antes
+de la entrega). Las decisiones de qué construir, qué enfoque tomar
+ante las restricciones (gratuito, sin backend, publicable) y qué
+prioridades tenía el proyecto han sido dirigidas de principio a fin
+por quien presenta este trabajo.
+
+================================================================
+Fin del documento.
+================================================================
+
+
+MEJORA POSTERIOR — SELECTOR DE EMOJIS PERSONALIZADOS
+--------------------------------------------------
+La creación de hábitos personalizados ahora incorpora un selector visual de emojis.
+Al cambiar de categoría, se propone automáticamente el primer emoji relacionado.
+El usuario puede abrir la paleta y elegir entre los iconos de esa categoría
+o mostrar todos los emojis de las ocho categorías; incluye instrumentos
+musicales (piano, guitarra, batería, tambor, flauta, violín, etc.).
+El emoji elegido se almacena usando el campo icon ya existente. No requiere
+migración ni cambios en localStorage, bibliotecas externas o despliegue.
+
+
+MEJORA POSTERIOR — DATOS DE EJEMPLO, REINICIO Y LOGO
+--------------------------------------------------
+Datos de ejemplo (js/demo.js): en Ajustes se pueden cargar 10 hábitos del
+catálogo (uno o más por categoría) con ~6 meses de historial generado con un
+generador pseudoaleatorio de semilla fija y ritmos distintos (constante,
+mejorando, solo entre semana, con un bache...). Las fechas se calculan
+respecto a hoy, así las rachas siempre están al día. Llevan la marca
+demo:true (etiqueta "ejemplo" en la interfaz), por lo que "Quitar datos de
+ejemplo" no toca los hábitos reales. Cargarlos es idempotente y no duplica un
+hábito del catálogo que el usuario ya tenga.
+Reinicio: quitar solo los de ejemplo, borrar solo el historial (conserva los
+hábitos) o borrar todo (doble confirmación).
+Mapa de constancia: con datos vacíos las celdas eran casi invisibles (sobre
+todo en modo oscuro). Ahora tienen borde y paleta propia por tema, hay
+leyenda y un mensaje explicativo cuando aún no hay actividad.
+Correcciones: la barra lateral en modo oscuro se volvía clara y dejaba el
+texto ilegible; en móvil, Estadísticas desbordaba horizontalmente.
+Logo: img/brote-icon.png sustituye al emoji de la barra lateral (fondo
+transparente, obtenido del JPG original).
+
+----------------------------------------------------------------------
+AJUSTE DE MODELO DE IA (octubre 2026)
+----------------------------------------------------------------------
+Tras probar la clave real, solo gemini-3.6-flash responde correctamente.
+Se han eliminado del selector de Ajustes gemini-2.0-flash-lite y
+gemini-1.5-flash, y ai.js ignora cualquier otro modelo que hubiera quedado
+guardado en localStorage de versiones anteriores (lista GEMINI_MODELS).

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brote — Gestor de buenos hábitos</title>
+<meta name="description" content="Brote: crea, sigue y haz crecer tus buenos hábitos con estadísticas visuales y un asistente de IA.">
+<link rel="icon" type="image/png" href="img/brote-icon.png">
+<link rel="apple-touch-icon" href="img/brote-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ============ SIDEBAR (escritorio) ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img class="brand-mark" src="img/brote-icon.png" alt="" width="42" height="45">
+      <span class="brand-text">Brote</span>
+    </div>
+    <p class="brand-tag">Gestor de buenos hábitos</p>
+
+    <nav class="nav" id="navMenu">
+      <button class="nav-btn active" data-view="dashboard"><span class="nav-ico">🏡</span><span>Resumen</span></button>
+      <button class="nav-btn" data-view="habits"><span class="nav-ico">🌿</span><span>Mis hábitos</span></button>
+      <button class="nav-btn" data-view="catalog"><span class="nav-ico">➕</span><span>Añadir hábito</span></button>
+      <button class="nav-btn" data-view="stats"><span class="nav-ico">📊</span><span>Estadísticas</span></button>
+      <button class="nav-btn" data-view="ai"><span class="nav-ico">✨</span><span>Asistente IA</span></button>
+      <button class="nav-btn" data-view="settings"><span class="nav-ico">⚙️</span><span>Ajustes</span></button>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+      <span id="themeIcon">🌙</span> <span id="themeLabel">Modo oscuro</span>
+    </button>
+  </aside>
+
+  <!-- ============ CONTENIDO ============ -->
+  <main class="content">
+
+    <!-- ---------- DASHBOARD ---------- -->
+    <section class="view active" id="view-dashboard">
+      <header class="view-header">
+        <div>
+          <p class="eyebrow-date" id="todayLabel">—</p>
+          <h1>Tu jardín de hábitos</h1>
+        </div>
+      </header>
+
+      <div class="dash-grid">
+        <div class="hero-card">
+          <div class="hero-ring-wrap">
+            <svg viewBox="0 0 140 140" class="hero-ring">
+              <circle cx="70" cy="70" r="60" class="ring-track"/>
+              <circle cx="70" cy="70" r="60" class="ring-fill" id="ringFill"/>
+            </svg>
+            <div class="hero-ring-text">
+              <span class="hero-num" id="heroPercent">0%</span>
+              <span class="hero-sub">hoy</span>
+            </div>
+          </div>
+          <div class="hero-info">
+            <p class="hero-title">Completados hoy</p>
+            <p class="hero-count"><span id="doneToday">0</span> / <span id="totalHabits">0</span> hábitos</p>
+            <p class="hero-quote" id="miniQuote">Cada pequeño paso de hoy es la raíz del hábito de mañana.</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-ico">🔥</span>
+          <span class="stat-value" id="statLongestStreak">0</span>
+          <span class="stat-label">Mejor racha (días)</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-ico">🌿</span>
+          <span class="stat-value" id="statActive">0</span>
+          <span class="stat-label">Hábitos activos</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-ico">📅</span>
+          <span class="stat-value" id="statMonth">0</span>
+          <span class="stat-label">Completados este mes</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Hábitos de hoy</h2>
+          <button class="btn-ghost" data-goto="catalog">+ Añadir</button>
+        </div>
+        <div id="todayList" class="today-list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Últimas 12 semanas</h2>
+        </div>
+        <div id="miniHeatmap" class="heatmap heatmap-mini"></div>
+      </div>
+
+      <div class="panel ai-tip-panel">
+        <div class="panel-head">
+          <h2>✨ Consejo del día</h2>
+          <button class="btn-ghost" id="btnRegenTip">Regenerar</button>
+        </div>
+        <p id="dailyTipText" class="ai-tip-text">Configura tu clave gratuita de IA en Ajustes para recibir un consejo personalizado cada día.</p>
+      </div>
+    </section>
+
+    <!-- ---------- MIS HÁBITOS ---------- -->
+    <section class="view" id="view-habits">
+      <header class="view-header">
+        <div>
+          <p class="eyebrow-date">Tu colección</p>
+          <h1>Mis hábitos</h1>
+        </div>
+        <button class="btn-primary" data-goto="catalog">+ Añadir hábito</button>
+      </header>
+      <div id="habitsByCategory"></div>
+      <p class="empty-msg" id="habitsEmptyMsg" hidden>Todavía no tienes hábitos. Ve a "Añadir hábito" para plantar el primero 🌱</p>
+    </section>
+
+    <!-- ---------- CATÁLOGO ---------- -->
+    <section class="view" id="view-catalog">
+      <header class="view-header">
+        <div>
+          <p class="eyebrow-date">Explora ideas</p>
+          <h1>Añadir hábito</h1>
+        </div>
+      </header>
+
+      <div class="panel">
+        <h2>Crear un hábito personalizado</h2>
+        <form id="customHabitForm" class="custom-form">
+          <input type="text" id="customName" placeholder="Nombre del hábito (ej. Regar las plantas)" maxlength="60" required>
+          <div class="emoji-picker-wrap" id="emojiPickerWrap">
+            <input type="hidden" id="customIcon" name="customIcon" value="🏃">
+            <button type="button" class="emoji-picker-trigger" id="emojiPickerTrigger" aria-label="Elegir emoji del hábito" aria-haspopup="dialog" aria-expanded="false" aria-controls="emojiPickerPanel">
+              <span id="customIconPreview" aria-hidden="true">🏃</span><span class="emoji-picker-chevron" aria-hidden="true">▾</span>
+            </button>
+            <div class="emoji-picker-panel" id="emojiPickerPanel" role="dialog" aria-label="Seleccionar emoji" hidden>
+              <div class="emoji-picker-top">
+                <strong>Elige un emoji</strong>
+                <button type="button" class="emoji-picker-close" id="emojiPickerClose" aria-label="Cerrar selector">✕</button>
+              </div>
+              <div class="emoji-picker-tabs" role="group" aria-label="Filtrar emojis">
+                <button type="button" class="emoji-tab active" id="emojiTabCategory" aria-pressed="true">De esta categoría</button>
+                <button type="button" class="emoji-tab" id="emojiTabAll" aria-pressed="false">Todos</button>
+              </div>
+              <div id="emojiPickerOptions" class="emoji-picker-options" role="group" aria-label="Emojis disponibles"></div>
+            </div>
+          </div>
+          <select id="customCategory"></select>
+          <button type="submit" class="btn-primary">Crear</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Catálogo de hábitos recomendados</h2>
+          <input type="search" id="catalogSearch" placeholder="Buscar hábito…" class="search-input">
+        </div>
+        <div id="catalogAccordion" class="accordion"></div>
+      </div>
+    </section>
+
+    <!-- ---------- ESTADÍSTICAS ---------- -->
+    <section class="view" id="view-stats">
+      <header class="view-header">
+        <div>
+          <p class="eyebrow-date">Tu evolución</p>
+          <h1>Estadísticas</h1>
+        </div>
+        <button class="btn-ghost" id="btnExportCsv">⬇ Exportar CSV</button>
+      </header>
+
+      <div class="panel">
+        <h2>% de cumplimiento — últimos 30 días</h2>
+        <canvas id="chartCompletion" height="90"></canvas>
+      </div>
+
+      <div class="panel">
+        <h2>Completados por categoría</h2>
+        <canvas id="chartCategory" height="90"></canvas>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Mapa de constancia</h2>
+          <select id="heatmapHabitSelect"><option value="__all__">Todos los hábitos</option></select>
+        </div>
+        <div id="fullHeatmap" class="heatmap heatmap-full"></div>
+        <p class="heatmap-empty" id="heatmapEmptyMsg" hidden></p>
+        <p class="heatmap-caption" id="heatmapStreakInfo"></p>
+        <div class="heatmap-legend" aria-hidden="true">
+          <span>Menos</span>
+          <span class="hm-cell" data-level="0"></span>
+          <span class="hm-cell" data-level="1"></span>
+          <span class="hm-cell" data-level="2"></span>
+          <span class="hm-cell" data-level="3"></span>
+          <span class="hm-cell" data-level="4"></span>
+          <span>Más</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- ASISTENTE IA ---------- -->
+    <section class="view" id="view-ai">
+      <header class="view-header">
+        <div>
+          <p class="eyebrow-date">Tu copiloto</p>
+          <h1>Asistente de IA</h1>
+        </div>
+      </header>
+
+      <div class="panel" id="aiNoKeyPanel">
+        <h2>Necesitas una clave gratuita</h2>
+        <p>El asistente usa la API gratuita de <strong>Google Gemini</strong>. Configúrala una vez en Ajustes y podrás usarla sin coste.</p>
+        <button class="btn-primary" data-goto="settings">Ir a Ajustes</button>
+      </div>
+
+      <div class="panel" id="aiActionsPanel" hidden>
+        <h2>¿Qué quieres que analice?</h2>
+        <div class="ai-actions">
+          <button class="btn-primary" id="btnAiAnalyze">📊 Analiza mi progreso</button>
+          <button class="btn-secondary" id="btnAiSuggest">💡 Sugiéreme un hábito nuevo</button>
+        </div>
+        <div id="aiResponseBox" class="ai-response" hidden>
+          <div class="ai-response-head">
+            <span>✨ Brote IA</span>
+            <span id="aiTimestamp" class="ai-timestamp"></span>
+          </div>
+          <div id="aiResponseText" class="ai-response-text"></div>
+        </div>
+        <div id="aiLoading" class="ai-loading" hidden><span class="spinner"></span> Pensando…</div>
+        <div id="aiError" class="ai-error" hidden></div>
+      </div>
+    </section>
+
+    <!-- ---------- AJUSTES ---------- -->
+    <section class="view" id="view-settings">
+      <header class="view-header">
+        <div>
+          <p class="eyebrow-date">Personaliza</p>
+          <h1>Ajustes</h1>
+        </div>
+      </header>
+
+      <div class="panel">
+        <h2>Inteligencia artificial (gratis)</h2>
+        <p class="panel-desc">Obtén una clave gratuita en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a> y pégala aquí. Se guarda solo en tu navegador (localStorage) y se usa exclusivamente para llamar directamente a la API de Google desde tu dispositivo.</p>
+        <form id="apiKeyForm" class="settings-form">
+          <label for="apiKeyInput">Clave de API de Gemini</label>
+          <input type="password" id="apiKeyInput" placeholder="AIza…" autocomplete="off">
+          <label for="modelSelect">Modelo</label>
+          <select id="modelSelect">
+            <option value="gemini-3.6-flash">gemini-3.6-flash (recomendado)</option>
+          </select>
+          <div class="settings-actions">
+            <button type="submit" class="btn-primary">Guardar clave</button>
+            <button type="button" class="btn-ghost" id="btnTestKey">Probar conexión</button>
+            <button type="button" class="btn-ghost" id="btnClearKey">Eliminar clave</button>
+          </div>
+          <p id="apiKeyStatus" class="settings-status"></p>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>Tus datos</h2>
+        <p class="panel-desc">Todo se guarda localmente en este navegador. Haz copias de seguridad de vez en cuando.</p>
+        <div class="settings-actions">
+          <button class="btn-ghost" id="btnExportJson">⬇ Exportar copia (JSON)</button>
+          <button class="btn-ghost" id="btnImportJson">⬆ Importar copia (JSON)</button>
+          <input type="file" id="importJsonFile" accept="application/json" hidden>
+        </div>
+        <p class="panel-desc settings-subhead">Empezar de cero</p>
+        <p class="panel-desc">«Borrar solo el historial» quita todas las marcas de completado (y las rachas) pero conserva tus hábitos. «Borrar todos los datos» lo elimina todo.</p>
+        <div class="settings-actions">
+          <button class="btn-danger" id="btnClearHistory">🧹 Borrar solo el historial</button>
+          <button class="btn-danger" id="btnResetAll">🗑 Borrar todos los datos</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Datos de ejemplo</h2>
+        <p class="panel-desc">Carga 10 hábitos con unos 6 meses de historial inventado (rachas, baches y ritmos distintos) para ver cómo quedan las gráficas, el mapa de constancia y el análisis de la IA. Aparecen marcados como «ejemplo» y puedes quitarlos cuando quieras sin tocar tus hábitos reales.</p>
+        <div class="settings-actions">
+          <button class="btn-primary" id="btnLoadDemo">🧪 Cargar datos de ejemplo</button>
+          <button class="btn-ghost" id="btnClearDemo">Quitar datos de ejemplo</button>
+        </div>
+        <p id="demoStatus" class="settings-status"></p>
+      </div>
+
+      <div class="panel">
+        <h2>Acerca de Brote</h2>
+        <p class="panel-desc">Proyecto final del Máster de Programación + IA de Jobie TECH. Código abierto, gratuito y sin dependencias de pago.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ BARRA INFERIOR (móvil) ============ -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bn-btn active" data-view="dashboard"><span>🏡</span>Resumen</button>
+    <button class="bn-btn" data-view="habits"><span>🌿</span>Hábitos</button>
+    <button class="bn-btn" data-view="catalog"><span>➕</span>Añadir</button>
+    <button class="bn-btn" data-view="stats"><span>📊</span>Datos</button>
+    <button class="bn-btn" data-view="ai"><span>✨</span>IA</button>
+    <button class="bn-btn" data-view="settings"><span>⚙️</span>Ajustes</button>
+  </nav>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/demo.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
