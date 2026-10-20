@@ -354,6 +354,9 @@ function renderSettingsView() {
   const s = getSettings();
   document.getElementById("apiKeyInput").value = s.geminiApiKey || "";
   document.getElementById("modelSelect").value = "gemini-3.6-flash";
+  const langSel = document.getElementById("aiLanguageSelect");
+  langSel.innerHTML = AI_LANGUAGES.map(l => `<option value="${l.id}">${l.label}</option>`).join("");
+  langSel.value = getAiLanguage().id;
   renderDemoStatus();
 }
 

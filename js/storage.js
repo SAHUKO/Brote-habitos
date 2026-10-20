@@ -198,7 +198,7 @@ function completionsByCategory() {
 
 // ---------- Ajustes ----------
 function getSettings() {
-  return loadJSON(LS_SETTINGS, { theme: "light", geminiApiKey: "", geminiModel: "gemini-3.6-flash", dailyTip: null });
+  return loadJSON(LS_SETTINGS, { theme: "light", geminiApiKey: "", geminiModel: "gemini-3.6-flash", aiLanguage: "es", dailyTip: null });
 }
 function saveSettings(settings) {
   saveJSON(LS_SETTINGS, settings);
@@ -236,7 +236,7 @@ function resetAllData() {
   localStorage.removeItem(LS_HABITS);
   localStorage.removeItem(LS_COMPLETIONS);
   const s = getSettings();
-  saveSettings({ theme: s.theme, geminiApiKey: s.geminiApiKey, geminiModel: s.geminiModel, dailyTip: null });
+  saveSettings({ theme: s.theme, geminiApiKey: s.geminiApiKey, geminiModel: s.geminiModel, aiLanguage: s.aiLanguage, dailyTip: null });
 }
 // Borra todas las marcas de "completado" pero conserva los hábitos.
 function clearHistoryOnly() {

@@ -296,6 +296,7 @@ Cálculo de rachas (la parte más "algorítmica" del proyecto):
   técnico en crudo.
 
 7.6 AJUSTES
+  - Idioma de las respuestas de la IA (español por defecto).
   - Gestión de la clave de la API de Gemini (guardar, probar conexión,
     eliminar) y elección de modelo (gemini-2.5-flash por defecto, con
     alternativas más rápidas o más estables).
@@ -565,3 +566,25 @@ Tras probar la clave real, solo gemini-3.6-flash responde correctamente.
 Se han eliminado del selector de Ajustes gemini-2.0-flash-lite y
 gemini-1.5-flash, y ai.js ignora cualquier otro modelo que hubiera quedado
 guardado en localStorage de versiones anteriores (lista GEMINI_MODELS).
+
+----------------------------------------------------------------------
+CORRECCIÓN DE LA IA E IDIOMA DE LAS RESPUESTAS (octubre 2026)
+----------------------------------------------------------------------
+Problema: «Analiza mi progreso» y «Sugiéreme un hábito nuevo» devolvían
+frases sueltas en inglés y cortadas (p. ej. "suggest ONE new habit. *
+Sleep is struggling (0 day streak"). No era la respuesta, sino el
+razonamiento interno de gemini-3.6-flash: los modelos Gemini 3 "piensan"
+antes de contestar y ese razonamiento cuenta dentro de maxOutputTokens.
+Con el límite de 400 se agotaban los tokens pensando y se mostraba ese
+trozo a medias.
+Solución (js/ai.js):
+- maxOutputTokens sube a 2048 y se pide thinkingLevel "low" (si el
+  modelo no admite ese ajuste, se reintenta automáticamente sin él).
+- Se descartan las partes marcadas como razonamiento (thought: true).
+- Si la respuesta termina por MAX_TOKENS se muestra un aviso en vez de
+  un texto incompleto.
+- Una systemInstruction obliga a responder solo en el idioma elegido.
+Selector de idioma: en Ajustes → Inteligencia artificial se elige el
+idioma de las respuestas (español por defecto, inglés, catalán, gallego,
+euskera, portugués o francés). Se guarda en gh_settings.aiLanguage y,
+al cambiarlo, se descarta el consejo del día cacheado.

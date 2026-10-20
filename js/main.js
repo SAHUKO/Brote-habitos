@@ -253,6 +253,14 @@ function wireSettings() {
     toast("Ajustes de IA guardados");
   });
 
+  // El idioma se guarda al momento, sin tener que pulsar "Guardar clave".
+  document.getElementById("aiLanguageSelect").addEventListener("change", (e) => {
+    const lang = AI_LANGUAGES.find(l => l.id === e.target.value) || AI_LANGUAGES[0];
+    // El consejo del día cacheado está en el idioma anterior: se descarta.
+    updateSettings({ aiLanguage: lang.id, dailyTip: null });
+    toast(`La IA responderá en ${lang.label}`);
+  });
+
   document.getElementById("btnTestKey").addEventListener("click", async () => {
     const key = document.getElementById("apiKeyInput").value.trim();
     const model = document.getElementById("modelSelect").value;
